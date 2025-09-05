@@ -1,8 +1,25 @@
+# server_main.py
 import time
 from fastapi import FastAPI, UploadFile, Form
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, PlainTextResponse
+from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI()
+app = FastAPI(title="Image Receiver")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.get("/")
+def root():
+    return {"ok": True, "message": "alive"}
+
+@app.get("/health")
+def health():
+    return PlainTextResponse("ok", status_code=200)
 
 @app.post("/upload")
 async def upload_image(
