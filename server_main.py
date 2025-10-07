@@ -41,6 +41,11 @@ class RunIn(BaseModel):
 class RunOut(RunIn):
     pass
 
+class RunMeta(BaseModel):
+    id: str
+    items_processed: int
+
+
 # ---------- Auth ----------
 def require_api_key(x_api_key: Optional[str] = Header(None)):
     if x_api_key != API_KEY:
@@ -108,3 +113,9 @@ def get_by_id(run_id: str, session: Session = Depends(get_session)):
         items_processed=run.items_processed,
         composition=[{"material": c.material, "percentage": c.percentage} for c in comps],
     )
+
+@app.get("/v1/runs", response_model=List[RunMeta])
+def list_runs(session: Session = Depends(get_session), limit: int = 50):
+    # newest first by pk
+    runs = session.exec(select(Run).order_by(Run.pk.desc()).limit(limit)).all()
+    return [RunMeta(id=r.id, items_processed=r.items_processed) for r in runs]
