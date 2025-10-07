@@ -115,7 +115,7 @@ def get_by_id(run_id: str, session: Session = Depends(get_session)):
     )
 
 @app.get("/v1/runs", response_model=List[RunMeta])
-def list_runs(session: Session = Depends(get_session), limit: int = 50):
+def list_runs(session: Session = Depends(get_session), limit: int = 100000):
     # newest first by pk
     runs = session.exec(select(Run).order_by(Run.pk.desc()).limit(limit)).all()
     return [RunMeta(id=r.id, items_processed=r.items_processed) for r in runs]
