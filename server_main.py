@@ -31,7 +31,7 @@ def get_session():
 # ---------- Schemas ----------
 class CompositionIn(BaseModel):
     material: str = Field(min_length=1)
-    percentage: confloat(ge=0, le=100)
+    percentage: confloat(ge=0)
 
 class RunIn(BaseModel):
     id: str = Field(min_length=1)
