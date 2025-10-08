@@ -119,3 +119,18 @@ def list_runs(session: Session = Depends(get_session), limit: int = 100000):
     # newest first by pk
     runs = session.exec(select(Run).order_by(Run.pk.desc()).limit(limit)).all()
     return [RunMeta(id=r.id, items_processed=r.items_processed) for r in runs]
+
+@app.delete("/v1/runs/{run_id}", status_code=204, dependencies=[Depends(require_api_key)])
+def delete_run(run_id: str, session: Session = Depends(get_session)):
+    run = session.exec(select(Run).where(Run.id == run_id)).first()
+    if not run:
+        raise HTTPException(status_code=404, detail="not found")
+
+    # delete composition rows for this run (SQLite: do it manually)
+    session.query(Composition).filter(Composition.run_fk == run.pk).delete()
+    session.commit()
+
+    # delete run row
+    session.delete(run)
+    session.commit()
+    # 204 No Content
